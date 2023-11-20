@@ -24,8 +24,8 @@ T_srk, p_srk = srk.get_envelope_twophase(1e5, n)
 #plt.plot(p, T,'b', label="Pure hydrogen") # Tp-projection of phase envelope
 
 figure, axis = plt.subplots(2, 2)
-axis[0, 0].plot(T_srk, p_srk, 'b', label="Ortho/para hydrogen, SRK")
-axis[0, 0].plot(T_m, p_m, 'y', label="O-H2 P-H2 mix, Saftvrqmie")
+axis[0,0].plot(T_srk, p_srk, 'b', label="Ortho/para hydrogen, SRK")
+axis[0,0].plot(T_m, p_m, 'y', label="O-H2 P-H2 mix, Saftvrqmie")
 axis[0,0].set_ylabel("pressure [Pa]")
 axis[0,0].set_xlabel("Temperature [K]")
 axis[0,0].set_title('Saftvrqmie vs. SRK')
@@ -41,10 +41,10 @@ def f(x_o):
      s_o = 33.446*calj
   
      n = [1-x_o, x_o]
-     lnphi = eos_mix.thermo(T, 1e5, n, eos_mix.VAPPH)  
+     lnphi, = eos_mix.thermo(T, 1e5, n, eos_mix.VAPPH)  
 
-     phi_p, = m.exp(lnphi[0])  # Replace 0 with the index of the relevant value
-     phi_o, = m.exp(lnphi[1])
+     phi_p = lnphi[0], # Replace 0 with the index of the relevant value
+     phi_o = lnphi[1],
      DeltaG_o = (h_o-h_p)-T*(s_o-s_p)
      R = 8.314 # kJ/molK
      
