@@ -33,7 +33,7 @@ axis[0,0].set_title('Saftvrqmie vs. SRK')
 
 
 def f(x_o):
-     T  =  300
+     T  =  30
      calj = 4.1840
      h_p = 2023.1*calj  #300K 
      h_o = 2040.87*calj
@@ -51,7 +51,7 @@ def f(x_o):
      eq = x_o/(1-x_o) - (lnphi[0]/lnphi[1])*m.exp(-DeltaG_o/(R*T))
      return eq
 
-initial_guess = 0.04
+initial_guess = 0.02
 
 # Use scipy.optimize.fsolve to find the root of the equation
 result = scipy.optimize.root(f, initial_guess)
