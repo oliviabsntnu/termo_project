@@ -16,9 +16,7 @@ from tabulate import tabulate
 eos_mix = saftvrqmie('P-H2,O-H2', minimum_temperature=20)
 srk = cubic('P-H2,O-H2', 'SRK')
 # eos_saftvrmie = saftvrmie('H2')
-x = [0.5,0.5] # Total Molar composition
-z= [0.5,0.5]
-n= [0.5,0.5]
+x = z = n = [0.5,0.5] # Total Molar composition
 
 #get envelope
 T_m, p_m = eos_mix.get_envelope_twophase(1e5, z)
