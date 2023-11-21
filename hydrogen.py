@@ -13,7 +13,7 @@ from pykingas.MieKinGas import MieKinGas
 
 
 
-x = z = n = [0.5,0.5] # Total Molar composition
+x = z = n = [0.25,0.75] # Total Molar composition
 
 comps= 'P-H2,O-H2'
 
@@ -130,36 +130,13 @@ table2 = zip(T_list, u_p_values, u_o_values, phi_p_values, phi_o_values, fug_p_v
 print(tabulate(table2, headers = ('T [K]', 'u_ [kJ/mol](P)', 'u_ [kJ/mol](O)', 'fug. coeff(P)', 'fug. coeff(O)', 'fugacities(P)','fugacities(O)')))
 
 
-axis[1,0].plot(T_list, u_p_values,'b') #Para
-axis[1,0].plot(T_list, u_o_values,'r') #Ortho
-axis[1,0].set_title('Chemical potential')
-axis[1,0].set_xlabel('temperature [K]')
-axis[1,0].set_ylabel('chemical potential [kJ/mol]')
-
-axis[1,1].plot(T_list, phi_p_values, 'b') #Para
-axis[1,1].plot(T_list, phi_o_values, 'r') #Ortho
-axis[1,1].set_title('fugacity coefficient')
-axis[1,1].set_xlabel('temperature [K]')
-axis[1,1].set_ylabel('fugacity coefficient')
-
-axis[0,1].plot(T_list, fug_p_values, 'b') #Para
-axis[0,1].plot(T_list, fug_o_values, 'r') #Ortho
-axis[0,1].set_title('fugacities')
-axis[0,1].set_xlabel('temperature [K]')
-axis[0,1].set_ylabel('fugacities')
-
-plt.tight_layout()
-plt.show()
-
 
 cond_val = []
 visc_val = []
 D_val = []
 D_con_val = []
-TD_fac_p = []
-TD_fac_o = []
-TD_val_p = []
-TD_val_o = []
+TD_fac = []
+TD_val = []
 
 
 for T, p, Vg in zip(T_list, p_list, vg_values):
@@ -175,15 +152,41 @@ for T, p, Vg in zip(T_list, p_list, vg_values):
     visc_val.append(visc)
     D_val.append(D)
     D_con_val.append(D_CoN)
+    TD_fac.append(alpha[1],)
+    TD_val.append(abs(DT[1]))
 
-    TD_fac_p.append(alpha[0],)
-    TD_fac_o.append(alpha[1],)
+table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val)
+print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]')))
 
-    TD_val_p.append(DT[0],)
-    TD_val_o.append(DT[1],)
+table4 = zip(T_list, p_list, TD_fac, TD_val)
+print(tabulate(table4, headers= ('T [K]', 'P [kPa]', 'Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
 
-table3 = zip(T_list, p_list, cond_val, visc_val, D_val)
-print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]')))
+
+#PLOTTING CHEMICAL POTENTIAL
+axis[1,0].plot(T_list, u_p_values,'b') #Para
+axis[1,0].plot(T_list, u_o_values,'r') #Ortho
+axis[1,0].set_title('Chemical potential')
+axis[1,0].set_xlabel('temperature [K]')
+axis[1,0].set_ylabel('chemical potential [kJ/mol]')
+
+#PLOTTING FUGACITY COEFFICIENT
+axis[1,1].plot(T_list, phi_p_values, 'b') #Para
+axis[1,1].plot(T_list, phi_o_values, 'r') #Ortho
+axis[1,1].set_title('fugacity coefficient')
+axis[1,1].set_xlabel('temperature [K]')
+axis[1,1].set_ylabel('fugacity coefficient')
+
+#PLOTTING FUGACITY
+axis[0,1].plot(T_list, fug_p_values, 'b') #Para
+axis[0,1].plot(T_list, fug_o_values, 'r') #Ortho
+axis[0,1].set_title('fugacities')
+axis[0,1].set_xlabel('temperature [K]')
+axis[0,1].set_ylabel('fugacities')
+
+plt.tight_layout()
+plt.show()
+
+
 
 
 
