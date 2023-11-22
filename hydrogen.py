@@ -14,7 +14,7 @@ from pykingas.MieKinGas import MieKinGas
 from scipy.interpolate import interp1d
 
 
-data = pd.read_excel(r'C:\Users\Celin\Documents\GitHub\termo_project\Para_percent.xlsx')
+data = pd.read_excel(r'Para_percent.xlsx')
 
 t_data, x_para, x_ortho = np.array(data['T[K]'], dtype=float), np.array(data['x_p'], dtype=float), np.array(data['x_o'], dtype=float)
 
@@ -24,7 +24,6 @@ print(tabulate(t_x_data, headers= ('T [K]', 'x (P)', 'x (O)')))
 #INTERPOLATING DATA FOR EVERY 5 DEGREES
 interp_tx = interp1d(t_data, x_para, kind='linear')
 x_p_interp = interp_tx(np.linspace(20, 300, 10))
-
 
 n_list = []
 
@@ -38,8 +37,6 @@ for i in range(len(x_p_interp)):
 x = [0.5,0.5]
 comps= 'P-H2,O-H2'
 
-
-#print(tabulate(n_list, headers= ('x_p', 'x_o')))
 
 eos = saftvrqmie(comps, minimum_temperature=20)
 srk = cubic(comps, 'SRK')
@@ -60,33 +57,34 @@ axis[0,0].set_xlabel("Temperature [K]")
 axis[0,0].set_title('Saftvrqmie vs. SRK')
 
 
-
-#def f(x_o):
- #    T  =  300
-  #   calj = 4.1840
-   #  h_p = 2023.1*calj #300K 
-    # h_o = 2040.87*calj
-     #s_p = 31.212*calj #300K
-     #s_o = 33.446*calj
+"""
+def f(x_o):
+     T  =  300
+     calj = 4.1840
+     h_p = 2023.1*calj #300K 
+     h_o = 2040.87*calj
+     s_p = 31.212*calj #300K
+     s_o = 33.446*calj
   
-     #n_ = [1-x_o, x_o]
-     #lnphi, = eos.thermo(T, 1e5, n_, eos.VAPPH)  
+     n_ = [1-x_o, x_o]
+     lnphi, = eos.thermo(T, 1e5, n_, eos.VAPPH)  
 
-     ##phi_p = lnphi[0], # Replace 0 with the index of the relevant value
-     ##phi_o = lnphi[1],
-    # DeltaG_o = (h_p-h_o)-T*(s_p-s_o)
-   #  R = 8.314 # kJ/molK
+     #phi_p = lnphi[0], # Replace 0 with the index of the relevant value
+     #phi_o = lnphi[1],
+     DeltaG_o = (h_p-h_o)-T*(s_p-s_o)
+     R = 8.314 # kJ/molK
      
-  #   eq = x_o/(1-x_o) - (lnphi[0]/lnphi[1])*m.exp(-DeltaG_o/(R*T))
- #    return eq
+     eq = x_o/(1-x_o) - (lnphi[0]/lnphi[1])*m.exp(-DeltaG_o/(R*T))
+     return eq
 
-#initial_guess = 0.04
+initial_guess = 0.04
 
-# Use scipy.optimize.fsolve to find the root of the equation
-#result = scipy.optimize.root(f, initial_guess)
-#print("Composition ortho:", result.x)
+#Use scipy.optimize.fsolve to find the root of the equation
+result = scipy.optimize.root(f, initial_guess)
+print("Composition ortho:", result.x)
 
-#f(0.75)
+f(0.75)
+"""
 
 #CREATING ARRAY OF TEMPERATURE AND PRESSURE
 T_list = np.linspace(20,300,len(x_p_interp))
@@ -175,8 +173,12 @@ for T, p, Vg in zip(T_list, p_list, vg_values):
     TD_fac.append(alpha[1],)
     TD_val.append(abs(DT[1]))
 
+TD_fac1 = []
+for i in TD_fac: 
+    TD_fac1.append(i[0])
+
 #TABLE OF THERM. COND. VISCOSITY, DIFFUSION COEFF. AND ALT. DIFFUSION COEFF, THERM. DIFF. COEFF. FAC., THERM. DIFF. COEFF.
-table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val, TD_fac, TD_val)
+table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val, TD_fac1, TD_val)
 print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]','Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
 
 
@@ -201,12 +203,33 @@ axis[0,1].set_title('fugacities')
 axis[0,1].set_xlabel('temperature [K]')
 axis[0,1].set_ylabel('fugacities')
 
+#plt.tight_layout()
+#plt.show()
+
+
+#PLOTTING 
+fig, axs = plt.subplots(3, 2)
+axs[0,0].plot(T_list, cond_val, 'b') 
+#axis[0,1].plot(T_list, fug_o_values, 'r') #Ortho
+axs[0,0].set_title('Therm. cond.')
+#axis[0,1].set_xlabel('temperature [K]')
+#axis[0,1].set_ylabel('fugacities')
+
+axs[0,1].plot(T_list, visc_val, 'b') 
+axs[0,1].set_title('Viscosity')
+
+axs[1,0].plot(T_list, D_val, 'r') 
+axs[1,0].plot(T_list, D_con_val, 'b')
+axs[1,0].set_title('Diff. coeff')
+
+axs[1,1].plot(T_list, TD_fac1, 'b') 
+axs[1,1].set_title('Therm. Diff. Coeff. Fac.')
+
+axs[2,0].plot(T_list, TD_val, 'b') 
+axs[2,0].set_title('Therm. Diff. Coeff.')
+
+#axs[2,1].plot(T_list, visc_val, 'b') 
+#axs[2,1].set_title('Viscosity')
+
 plt.tight_layout()
 plt.show()
-
-
-
-
-
-
-
