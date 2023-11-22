@@ -10,6 +10,20 @@ from thermopack.cubic import cubic
 import pandas as pd
 from tabulate import tabulate 
 from pykingas.MieKinGas import MieKinGas
+from scipy.interpolate import interp1d
+
+
+data = pd.read_excel(r'C:\Users\goeol\GitHub\termo_project\Para_percent.xlsx')
+
+t_data, x_para, x_ortho = np.array(data['T[K]'], dtype=float), np.array(data['x_p'], dtype=float), np.array(data['x_o'], dtype=float)
+
+
+
+t_x_data = zip(t_data, x_para, x_ortho)
+print(tabulate(t_x_data, headers= ('T [K]', 'x (P)', 'x (O)')))
+
+
+interp_tx = interp1d(t_data, x_para)
 
 
 
