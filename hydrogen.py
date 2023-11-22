@@ -14,7 +14,7 @@ from pykingas.MieKinGas import MieKinGas
 from scipy.interpolate import interp1d
 
 
-data = pd.read_excel(r'Para_percent.xlsx')
+data = pd.read_excel(r'C:\Users\Celin\Documents\GitHub\termo_project\Para_percent.xlsx')
 
 t_data, x_para, x_ortho = np.array(data['T[K]'], dtype=float), np.array(data['x_p'], dtype=float), np.array(data['x_o'], dtype=float)
 
@@ -23,8 +23,8 @@ print(tabulate(t_x_data, headers= ('T [K]', 'x (P)', 'x (O)')))
 
 #INTERPOLATING DATA FOR EVERY 5 DEGREES
 interp_tx = interp1d(t_data, x_para, kind='linear')
-x_p_interp = interp_tx(np.arange(20, 300, 5))
-x_o_interp = 1-x_p_interp
+x_p_interp = interp_tx(np.linspace(20, 300, 10))
+
 
 n_list = []
 
@@ -89,11 +89,7 @@ axis[0,0].set_title('Saftvrqmie vs. SRK')
 #f(0.75)
 
 #CREATING ARRAY OF TEMPERATURE AND PRESSURE
-T_list = [20]
-for i in range(len(x_p_interp)):
-    T = T_list[i]+5
-    T_list.append(T)
-print(T_list)
+T_list = np.linspace(20,300,len(x_p_interp))
 
 p_list = []
 for i in range(len(T_list)): 
