@@ -22,9 +22,9 @@ t_data, x_para, x_ortho = np.array(data['T[K]'], dtype=float), np.array(data['x_
 t_x_data = zip(t_data, x_para, x_ortho)
 print(tabulate(t_x_data, headers= ('T [K]', 'x (P)', 'x (O)')))
 
-
-interp_tx = interp1d(t_data, x_para)
-
+#INTERPOLATING DATA FOR EVERY 5 DEGREES
+interp_tx = interp1d(t_data, x_para, kind='linear')
+x_p_interp = interp_tx(np.arange(20, 300, 5))
 
 
 x = z = n = [0.25,0.75] # Total Molar composition
@@ -76,8 +76,11 @@ result = scipy.optimize.root(f, initial_guess)
 print("Composition ortho:", result.x)
 
 f(0.75)
-
-T_list = np.arange(20, 307, 18).tolist()
+T_list = [20]
+for i in range(len(x_p_interp)):
+    T = T_list[i]+5
+    T_list.append(T)
+print(T_list)
 
 p_list = []
 for i in range(len(T_list)): 
