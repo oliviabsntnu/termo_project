@@ -1,6 +1,7 @@
 import numpy as np
 import math as m
 import scipy.integrate
+from scipy import optimize
 import matplotlib.pyplot as plt
 from thermopack.saftvrmie import saftvrmie
 from thermopack.saftvrqmie import saftvrqmie
@@ -40,6 +41,7 @@ mie = MieKinGas(comps, use_eos=eos)
 T_m, p_m = eos.get_envelope_twophase(1e5, x)
 T_srk, p_srk = srk.get_envelope_twophase(1e5, x)
 #plt.plot(p, T,'b', label="Pure hydrogen") # Tp-projection of phase envelope
+T_ = list(range(30,301))
 
 figure, axis = plt.subplots(2, 2)
 axis[0,0].plot(T_srk, p_srk, 'b', label="Ortho/para hydrogen, SRK")
