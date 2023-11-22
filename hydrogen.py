@@ -13,7 +13,7 @@ from pykingas.MieKinGas import MieKinGas
 from scipy.interpolate import interp1d
 
 
-data = pd.read_excel(r'C:\Users\Celin\Documents\GitHub\termo_project\Para_percent.xlsx')
+data = pd.read_excel(r'Para_percent.xlsx')
 
 t_data, x_para, x_ortho = np.array(data['T[K]'], dtype=float), np.array(data['x_p'], dtype=float), np.array(data['x_o'], dtype=float)
 
@@ -25,12 +25,20 @@ interp_tx = interp1d(t_data, x_para, kind='linear')
 x_p_interp = interp_tx(np.arange(20, 300, 5))
 x_o_interp = 1-x_p_interp
 
-n_list = zip(x_p_interp, x_o_interp) # Total Molar composition
+n_list = []
+
+for i in range(len(x_p_interp)): 
+    xp = x_p_interp[i]
+    xo = 1-x_p_interp[i]
+    n = xp,xo
+    n_list.append(n)
+
+
 x = [0.5,0.5]
 comps= 'P-H2,O-H2'
 
 
-print(tabulate(n_list, headers= ('x_p', 'x_o')))
+#print(tabulate(n_list, headers= ('x_p', 'x_o')))
 
 eos = saftvrqmie(comps, minimum_temperature=20)
 srk = cubic(comps, 'SRK')
@@ -94,7 +102,7 @@ for i in range(len(T_list)):
 vg_values = []
 #SPECIFIC VOLUME FOR THE MIXTURE
 for T, p, n in zip(T_list, p_list, n_list):
-    Vg, = eos.specific_volume(T, p, n_list, eos.VAPPH)
+    Vg, = eos.specific_volume(T, p, n, eos.VAPPH)
     vg_values.append(Vg,)
 
 table1 = zip(T_list, p_list, vg_values)
@@ -115,7 +123,7 @@ fug_p_values = []
 calj = 4.1840 # 1cal = 4.18400 joule
 
 
-for n_list, T, p, Vg in zip(x_p_interp, x_o_interp, T_list, p_list, vg_values):
+for n, T, p, Vg in zip(n_list, T_list, p_list, vg_values):
     R = 8.314          #J/kmol
     h_p = 2023.1*calj  #300K 
     h_o = 2040.87*calj
@@ -126,9 +134,9 @@ for n_list, T, p, Vg in zip(x_p_interp, x_o_interp, T_list, p_list, vg_values):
     eos.set_ideal_entropy_reference_value(1,s_p)
     eos.set_ideal_entropy_reference_value(2,s_o)
 
-    u_, = eos.chemical_potential_tv(T, Vg, n_list)
-    phi, = eos.thermo(T, 1e5, n_list, eos.VAPPH)
-    fug, = eos.fugacity_tv(T, Vg, n_list)
+    u_, = eos.chemical_potential_tv(T, Vg, n)
+    phi, = eos.thermo(T, 1e5, n, eos.VAPPH)
+    fug, = eos.fugacity_tv(T, Vg, n)
 
     fug_p_values.append(fug[0],)
     fug_o_values.append(fug[1],)
@@ -155,12 +163,12 @@ TD_val = []
 
 for T, p, Vg in zip(T_list, p_list, vg_values):
 
-    cond = mie.thermal_conductivity(T, Vg, n_list, N=2) # Thermal conductivity [W / m K]
-    visc = mie.viscosity(T, Vg, n_list, N=2) # Shear viscosity [Pa s] #originally (T, Vm, x, N=2)
-    D = mie.interdiffusion(T, Vg, n_list, N=2) #Binary diffusion coefficient [m^2 / s]
-    D_CoN = mie.interdiffusion(T, Vg, n_list, N=2, frame_of_reference='CoN') # Diffusion coefficient
-    alpha = mie.thermal_diffusion_factor(T, Vg, n_list, N=2) # Thermal diffusion factors [dimensionless]
-    DT = mie.thermal_diffusion_coeff(T, Vg, n_list, N=2) # Thermal diffusion coefficients in the CoN FoR [mol / m s]
+    cond = mie.thermal_conductivity(T, Vg, n, N=2) # Thermal conductivity [W / m K]
+    visc = mie.viscosity(T, Vg, n, N=2) # Shear viscosity [Pa s] #originally (T, Vm, x, N=2)
+    D = mie.interdiffusion(T, Vg, n, N=2) #Binary diffusion coefficient [m^2 / s]
+    D_CoN = mie.interdiffusion(T, Vg, n, N=2, frame_of_reference='CoN') # Diffusion coefficient
+    alpha = mie.thermal_diffusion_factor(T, Vg, n, N=2) # Thermal diffusion factors [dimensionless]
+    DT = mie.thermal_diffusion_coeff(T, Vg, n, N=2) # Thermal diffusion coefficients in the CoN FoR [mol / m s]
 
     cond_val.append(cond)
     visc_val.append(visc)
