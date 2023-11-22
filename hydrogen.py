@@ -76,6 +76,8 @@ result = scipy.optimize.root(f, initial_guess)
 print("Composition ortho:", result.x)
 
 f(0.75)
+
+#CREATING ARRAY OF TEMPERATURE AND PRESSURE
 T_list = [20]
 for i in range(len(x_p_interp)):
     T = T_list[i]+5
@@ -89,7 +91,7 @@ for i in range(len(T_list)):
 
 
 vg_values = []
-#specific volume for the ortho/para mxture
+#SPECIFIC VOLUME FOR THE MIXTURE
 for T, p in zip(T_list, p_list):
     Vg, = eos.specific_volume(T, p, z, eos.VAPPH)
     vg_values.append(Vg,)
@@ -99,13 +101,7 @@ print(tabulate(table1, headers = ('T [K]', 'P [kPa]', 'Vg [L/kg]')))
 print()
 
 
-#print('Temperature:',T)
-# srk vs kvantetilstand ved lavere og lavere temperaturer, når begynner de å avvike fra hverandre, #
-# finne eksperimentell data for hydrogen ved lave temperaturer
-#ved å bruke dannelsesentalpier for orto og para, og finne likevektsfunksjoner
-# tetthet, specific volume
-
-
+#CALCULATING CHEMICAL POTENTIAL, FUGACITY COEFFICIENT AND FUGACITY FOR THE COMPONENTS IN THE MIXTURE
 u_p_values = []
 u_o_values =[]
 
@@ -116,7 +112,6 @@ fug_o_values = []
 fug_p_values = []
 
 calj = 4.1840 # 1cal = 4.18400 joule
-
 
 
 for T, p, Vg in zip(T_list, p_list, vg_values):
@@ -143,11 +138,12 @@ for T, p, Vg in zip(T_list, p_list, vg_values):
     phi_p_values.append(m.exp(phi[0]),)
     phi_o_values.append(m.exp(phi[1]),)
 
+#TABLE OF CHEMICAL POTENTIAL, FUGACITY COEFF. AND FUGACITY FOR THE COMPONENTS IN THE MIXTURE
 table2 = zip(T_list, u_p_values, u_o_values, phi_p_values, phi_o_values, fug_p_values, fug_o_values)
 print(tabulate(table2, headers = ('T [K]', 'u_ [kJ/mol](P)', 'u_ [kJ/mol](O)', 'fug. coeff(P)', 'fug. coeff(O)', 'fugacities(P)','fugacities(O)')))
 
 
-
+#CALCULATING THERMAL CONDUCTIVITY, VISCOSITY, DIFFUSION COEFFICIENTS, THERMAL DIFFUSION FACTORS AND THERMAL DIFFUSION COEFFICIENTS FOR THE MIXTURE
 cond_val = []
 visc_val = []
 D_val = []
@@ -172,11 +168,9 @@ for T, p, Vg in zip(T_list, p_list, vg_values):
     TD_fac.append(alpha[1],)
     TD_val.append(abs(DT[1]))
 
-table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val)
-print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]')))
-
-table4 = zip(T_list, p_list, TD_fac, TD_val)
-print(tabulate(table4, headers= ('T [K]', 'P [kPa]', 'Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
+#TABLE OF THERM. COND. VISCOSITY, DIFFUSION COEFF. AND ALT. DIFFUSION COEFF, THERM. DIFF. COEFF. FAC., THERM. DIFF. COEFF.
+table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val, TD_fac, TD_val)
+print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]','Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
 
 
 #PLOTTING CHEMICAL POTENTIAL
