@@ -34,7 +34,7 @@ print(tabulate(t_visc_data, headers= ('T[K]', 'Visc. coeff')))
 
 #INTERPOLATING DATA FOR EVERY 5 DEGREES
 interp_tx = interp1d(t_data, x_para, kind='linear')
-x_p_interp = interp_tx(np.linspace(20, 300, 10))
+x_p_interp = interp_tx(np.linspace(20, 300, 50))
 
 n_list = []
 
@@ -61,7 +61,7 @@ T_ = list(range(30,301))
 figsrk = fig.add_subplot(211)
 figsrk.plot(T_srk, p_srk, 'b', label="Ortho/para hydrogen, SRK")
 figsrk.plot(T_m, p_m, 'y', label="O-H2 P-H2 mix, Saftvrqmie")
-figsrk.set_ylabel("pressure [Pa]")
+figsrk.set_ylabel("Pressure [Pa]")
 figsrk.set_xlabel("Temperature [K]")
 figsrk.set_title('Saftvrqmie vs. SRK')
 
@@ -133,10 +133,9 @@ fug_o_values = []
 fug_p_values = []
 
 calj = 4.1840 # 1cal = 4.18400 joule
-
+R = 8.314          #J/Kmol
 
 for n, T, p, Vg in zip(n_list, T_list, p_list, vg_values):
-    R = 8.314          #J/kmol
     h_p = 2023.1*calj  #300K 
     h_o = 2040.87*calj
     s_p = 31.212*calj  #300K
@@ -212,12 +211,12 @@ for cond, T in zip(cond_val, T_list):
     Lqq(cond, T)
 
 L11_list = []
-def L11(temp, diff, interdif):
-    L11 = temp*diff/interdif
+def L11(temp, interdif, x1):
+    L11 = temp*interdif/(R*temp*m.log(x1))
     return L11_list.append(L11)
 
-for T, D, D_CoN in zip(T_list, D_val, interdif_list):
-    L11(T, D, D_CoN)
+for T, D_CoN, xp  in zip(T_list, interdif_list, x_p_interp):
+    L11(T, D_CoN, xp)
 
 L1q_list = []
 def L1q(x1, x2, alphaT, L11, interdif):
@@ -227,9 +226,6 @@ def L1q(x1, x2, alphaT, L11, interdif):
 for xp, alpha, L11, interdif in zip(x_p_interp, TD_fac1, L11_list, interdif_list):
     L1q(xp, 1-xp, alpha, L11, interdif)
 
-
-table4 = zip(T_list, cond_val, Lqq_list, L11_list, L1q_list)
-print(tabulate(table4, headers =('T [K]','Therm. cond [W/mK]', 'Lqq', 'L11', 'L1q' )))
 
 #------------------------------------------------------------------------------------------------
 #SAME FOR NORMAL HYDROGEN!!!!!!
@@ -254,7 +250,6 @@ calj = 4.1840 # 1cal = 4.18400 joule
 
 
 for T, p, Vg in zip(T_list, p_list, vg_values_normal):
-    R = 8.314          #J/kmol
     h_p = 2023.1*calj  #300K 
     h_o = 2040.87*calj
     s_p = 31.212*calj  #300K
@@ -307,9 +302,6 @@ TD_fac1_normal = []
 for alpha in TD_fac_normal: 
     TD_fac1_normal.append(alpha[1])
 
-#TABLE OF THERM. COND. VISCOSITY, DIFFUSION COEFF. AND ALT. DIFFUSION COEFF, THERM. DIFF. COEFF. FAC., THERM. DIFF. COEFF.
-#table3 = zip(T_list, p_list, cond_val, visc_val, D_val, D_con_val, TD_fac1, TD_val)
-#print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]','Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
 
 interdif_list_normal = []
 for T, Vg in zip(T_list, vg_values_normal):
@@ -325,81 +317,81 @@ for cond, T in zip(cond_val_normal, T_list):
     Lqq(cond, T)
 
 L11_list_normal = []
-def L11(temp, diff, interdif):
-    L11 = temp*diff/interdif
+def L11(temp, interdif, x1):
+    L11 = temp*interdif/(R*temp*m.log(x1))
     return L11_list_normal.append(L11)
 
-for T, D, D_CoN in zip(T_list, D_val_normal, interdif_list_normal):
-    L11(T, D, D_CoN)
+x_para_normal = 0.25
+for T, D_CoN  in zip(T_list, interdif_list_normal):
+    L11(T, D_CoN, x_para_normal)
+
 
 L1q_list_normal = []
 def L1q(x1, x2, alphaT, L11, interdif):
     L1q = x1*x2*alphaT*L11*interdif
     return L1q_list_normal.append(L1q)
 
-x_para_normal = 0.25
+
 for alpha, L11, interdif in zip(TD_fac1_normal, L11_list_normal, interdif_list_normal):
     L1q(x_para_normal, 1-x_para_normal, alpha, L11, interdif)
 
+
+table4 = zip(T_list, cond_val, Lqq_list, Lqq_list_normal, L11_list, L11_list_normal, L1q_list, L1q_list_normal)
+print(tabulate(table4, headers =('T [K]','Therm. cond [W/mK]', 'Lqq', 'Lqq (N)', 'L11', 'L11 (N)','L1q', 'L1q (N)')))
 #---------------------------------------------------------------------------------------------------
 
 
 #PLOTTING CHEMICAL POTENTIAL
 figf, axis = plt.subplots(3)
-axis[0].plot(T_list, u_p_values,'g', label= 'Para') #Para
-axis[0].plot(T_list, u_o_values,'m', label= 'Ortho') #Ortho
-axis[0].plot(T_list, u_p_values_normal,'b', label= 'Para') #Para
-axis[0].plot(T_list, u_o_values_normal,'r', label= 'Ortho') #Ortho
-axis[0].set_title('Chemical potential')
-axis[0].set_xlabel('Temperature [K]')
-axis[0].set_ylabel('[kJ/mol]')
 
 #PLOTTING FUGACITY COEFFICIENT
-axis[1].plot(T_list, phi_p_values, 'g', label= 'Para') #Para
-axis[1].plot(T_list, phi_o_values, 'm', label= 'Ortho') #Ortho
-axis[1].plot(T_list, phi_p_values_normal, 'b', label= 'Para') #Para
-axis[1].plot(T_list, phi_o_values_normal, 'r', label= 'Ortho') #Ortho
-axis[1].set_title('Fugacity coefficient')
-axis[1].set_xlabel('Temperature [K]')
-#axis[1].set_ylabel('Fugacity coefficient')
+axis[0].plot(T_list, phi_p_values, 'g', label= 'Para') #Para
+axis[0].plot(T_list, phi_o_values, 'm', label= 'Ortho') #Ortho
+axis[0].plot(T_list, phi_p_values_normal, 'b', label= 'Para') #Para
+axis[0].plot(T_list, phi_o_values_normal, 'r', label= 'Ortho') #Ortho
+axis[0].set_title('Fugacity coefficient')
+#axis[0].set_xlabel('Temperature [K]')
+#axis[0].set_ylabel('Fug. coeff.')
 
 #PLOTTING FUGACITY
-axis[2].plot(T_list, fug_p_values, 'g', label= 'Para') #Para
-axis[2].plot(T_list, fug_o_values, 'm', label= 'Ortho') #Ortho
-axis[2].plot(T_list, fug_p_values_normal, 'b', label= 'Para') #Para
-axis[2].plot(T_list, fug_o_values_normal, 'r', label= 'Ortho') #Ortho
-axis[2].set_title('Fugacities')
-axis[2].set_xlabel('Temperature [K]')
-#axis[2].set_ylabel('fugacities')
+axis[1].plot(T_list, fug_p_values, 'b', label= 'Para') #Para
+axis[1].plot(T_list, fug_o_values, 'r', label= 'Ortho') #Ortho
+axis[1].set_title('Fugacity (mixture)')
 
-#print(tabulate(table3, headers = ('T [K]','P [kPa]','Therm. cond [W/mK]', 'Visc. [Pa S]', 'Diff. coeff [m^2/s]', 'Alt. Diff coeff [m^2/s]','Therm. Diff. Coeff. Fac','Therm. Diff. Coeff')))
+
+axis[2].plot(T_list, fug_p_values_normal, 'b') #Para
+axis[2].plot(T_list, fug_o_values_normal, 'r') #Ortho
+axis[2].set_title('Fugacity (normal)')
+#axis[2].set_ylabel('Fugacity')
+figf.supxlabel('Temperature [K]')
+
 
 #PLOTTING 
 fig, axs = plt.subplots(3, 2)
+
 axs[0,0].plot(T_list, vg_values, 'r')
 axs[0,0].plot(T_list, vg_values_normal, 'b')
 axs[0,0].set_title('Specific volume')
-#axis[0,0].set_xlabel('Temperature [K]')
 axs[0,0].set_ylabel('[m^3/mol]')
+
+axs[0,1].plot(T_list, u_p_values,'g', label= 'Para') #Para
+axs[0,1].plot(T_list, u_o_values,'m', label= 'Ortho') #Ortho
+axs[0,1].plot(T_list, u_p_values_normal,'b', label= 'Para') #Para
+axs[0,1].plot(T_list, u_o_values_normal,'r', label= 'Ortho') #Ortho
+axs[0,1].set_title('Chemical potential')
+#axs[0,1].set_xlabel('Temperature [K]')
+axs[0,1].set_ylabel('[kJ/mol]')
 
 axs[2,1].plot(T_list, cond_val, 'r') 
 axs[2,1].plot(T_list, cond_val_normal, 'b') 
 axs[2,1].set_title('Therm. cond.')
-#axis[2,1].set_xlabel('Temperature [K]')
 axs[2,1].set_ylabel('[W/mK]')
-
-axs[0,1].plot(T_list, visc_val, 'r') 
-axs[0,1].plot(T_list, visc_val_normal, 'b') 
-axs[0,1].set_title('Viscosity')
-#axis[0,1].set_xlabel('Temperature [K]')
-axs[0,1].set_ylabel('[Pa s]')
 
 axs[1,0].plot(T_list, D_val, 'm') 
 axs[1,0].plot(T_list, D_con_val, 'r')
 axs[1,0].plot(T_list, D_val_normal, 'g') 
 axs[1,0].plot(T_list, D_con_val_normal, 'b')
 axs[1,0].set_title('Diff. coeff')
-#axis[1,0].set_xlabel('Temperature [K]')
 axs[1,0].set_ylabel('[m^2/s]')
 
 axs[1,1].plot(T_list, TD_fac1, 'r') 
@@ -409,6 +401,8 @@ axs[1,1].set_title('Therm. Diff. Coeff. Fac.')
 axs[2,0].plot(T_list, TD_val, 'r') 
 axs[2,0].plot(T_list, TD_val_normal, 'b') 
 axs[2,0].set_title('Therm. Diff. Coeff.')
+fig.supxlabel('Temperature [K]')
+
 
 
 
@@ -418,25 +412,36 @@ figt, axst = plt.subplots(3)
 axst[0].plot(T_list, Lqq_list, 'r',label='accurate')
 axst[0].plot(T_list, Lqq_list_normal, 'b', label='normal hydrogen')
 axst[0].set_title('Transport coefficient (Lqq)')
+axst[0].set_yscale('symlog')
 
 axst[1].plot(T_list, L11_list, 'r')
 axst[1].plot(T_list, L11_list_normal, 'b')
 axst[1].set_title('Transport coefficient (L11)')
+axst[1].set_yscale('symlog', linthresh=1e-8)
 
 axst[2].plot(T_list, L1q_list, 'r')
 axst[2].plot(T_list, L1q_list_normal, 'b')
 axst[2].set_title('Transport coefficient (L1q)')
+axst[2].set_yscale('symlog', linthresh=1e-17)
+figt.supxlabel('Temperature [K]')
+
 
 figvs, axvs = plt.subplots(2)
-axvs[0].plot(T_list, visc_val, 'r') 
-axvs[0].plot(T_list, visc_val_normal, 'b') 
-axvs[0].set_title('Viscosity')
+
 axvs[1].plot(T_list, visc_val, 'r') 
 axvs[1].plot(T_list, visc_val_normal, 'b') 
-axvs[1].set_title('Viscosity')
+#axvs[1].set_title('Viscosity')
 plt.scatter(t_visc, visc_data, marker='o')
 axvs[1].set_xlabel('Temperature [K]')
-axvs[1].set_ylabel('[Pa s]')
+axvs[1].set_ylabel('Viscosity [Pa s]')
+
+axvs[0].plot(T_list, visc_val, 'r') 
+axvs[0].plot(T_list, visc_val_normal, 'b') 
+#axvs[0].set_title('Viscosity')
+plt.scatter(t_visc, visc_data, marker='o')
+axvs[0].set_xlabel('Temperature [K]')
+axvs[0].set_ylabel('Viscosity [Pa s]')
+
 
 #plt.plot(T_list, visc_val, 'r')
 #plt.plot(T_list, visc_val_normal, 'b')
